@@ -1,0 +1,22 @@
+{
+    "files.associations": {
+        "PbaThing.C": "cpp",
+        "MyThing.C": "cpp",
+        "pbalitesim.C": "cpp",
+        "DynamicalState.C": "cpp",
+        "MyThing1.C": "cpp",
+        "PbaViewer.C": "cpp",
+        "simple_viewer.C": "cpp",
+        "StarterViewer.C": "cpp",
+        "GISolver.C": "cpp",
+        "ExplicitDynamics.C": "cpp",
+        "ForceLibrary.C": "cpp",
+        "CollisionHandler.C": "cpp",
+        "CollisionSurface.C": "cpp",
+        "CollisionPlane.C": "cpp",
+        "CollisionTriangle.C": "cpp",
+        "CollisionGeometryLibrary.C": "cpp",
+        "OccupancyGrid.C": "cpp",
+        "OccupancyVolume.C": "cpp"
+    }
+}
