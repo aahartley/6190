@@ -23,17 +23,17 @@ bool CollisionPlane::hit( const Vector& X0, const Vector& Xu, const Vector& V, c
     float fxu = normal * ((Xu) - P0);
     float fx0 = normal * ((X0) - P0);
 
-    if(fxu >=0)
-    {
-        fxu = (Xu - P0) * normal - rad;
-    }
-    else fxu = (Xu - P0) * normal + rad;
+    // if(fxu >=0)
+    // {
+    //     fxu = (Xu - P0) * normal - rad;
+    // }
+    // else fxu = (Xu - P0) * normal + rad;
 
-    if(fx0 >=0)
-    {
-        fx0 = (X0 - P0) * normal - rad;
-    }
-    else fx0 = (X0 - P0) * normal + rad;
+    // if(fx0 >=0)
+    // {
+    //     fx0 = (X0 - P0) * normal - rad;
+    // }
+    // else fx0 = (X0 - P0) * normal + rad;
 
     if((fxu == 0 || fx0 * fxu < 0 || (fxu <=0 && fx0 <=0))) hit = true;
     if(hit)

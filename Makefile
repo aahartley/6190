@@ -14,6 +14,9 @@ OFILES = base/PbaViewer.o \
 	 base/CollisionSurface.o\
 	 base/CollisionTriangle.o\
 	 base/CollisionGeometryLibrary.o\
+	 base/DFSPHForce.o\
+	 base/SPHState.C\
+	 base/DFSPHSolver.o\
 	 base/OccupancyVolume.o\
 	 things/MyThing.o \
 	 things/MyThing1.o

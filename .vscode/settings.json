@@ -17,6 +17,8 @@
         "CollisionTriangle.C": "cpp",
         "CollisionGeometryLibrary.C": "cpp",
         "OccupancyGrid.C": "cpp",
-        "OccupancyVolume.C": "cpp"
+        "OccupancyVolume.C": "cpp",
+        "DFSPHSolver.C": "cpp",
+        "SPHState.C": "cpp"
     }
 }
