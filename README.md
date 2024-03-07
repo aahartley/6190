@@ -1,8 +1,8 @@
 # 6190
 ## Physics Based Animation
-Engine to create physics simulations
+Engine to create physics simulations.
 Header files were given in class, implementation done by me.
-DFSPH thesis included
+DFSPH thesis included.
 Includes forces, collisions, neighborhood search, DFSPH, Geometric Integration Solvers
 ## WIP
 Add soft/rigid bodies
