@@ -7,6 +7,7 @@ Includes forces, collisions, neighborhood search, DFSPH, Geometric Integration S
 ## WIP
 Add soft/rigid bodies
 Create a BVH for triangle collisions
-## Sample image of hummanoid with obj models
-![test0](https://github.com/aahartley/8190/assets/50050814/63f44668-a09d-4e32-9f89-abd53c4c902d)
+## Sample image of DFSPH
+![image](https://github.com/aahartley/6190/assets/50050814/bd250a7d-3669-42ea-8b20-684938380baa)
+
 
