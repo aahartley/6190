@@ -9,5 +9,6 @@ Add soft/rigid bodies
 Create a BVH for triangle collisions
 ## Sample image of DFSPH
 ![image](https://github.com/aahartley/6190/assets/50050814/bd250a7d-3669-42ea-8b20-684938380baa)
+https://github.com/aahartley/6190/assets/50050814/b09b546b-eb1a-48db-a63b-35e776b2ba90
 
 
