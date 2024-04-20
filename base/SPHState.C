@@ -3,9 +3,12 @@
 //  SPHState.C
 //
 //  Container for data associated with the dynamics
-//  degrees of freedom of a single rigid body.
+//  degrees of freedom of sph system (weakly incompressible & DFSPH).
 //
-//  Copyright (c) 2017 Jerry Tessendorf
+//  DFSPH functions are based off the 2015 paper: https://animation.rwth-aachen.de/media/papers/2015-SCA-DFSPH.pdf
+//  2017 paper, where the equations are written differently (still equivalent): https://animation.rwth-aachen.de/media/papers/2017-TVCG-ViscousDFSPH.pdf
+//
+//  Copyright (c) 2019 Jerry Tessendorf
 //
 //
 //--------------------------------------------------------
@@ -160,7 +163,27 @@ SPHState pba::copy( const SPHState d )
 //     }
 
 // }
-
+// // Cubic spline kernel function
+// const float SPHStateData::weight(size_t p, const Vector& P) const
+// {
+//    Vector X = (P - pos(p));
+//    float q = (1.0f/radius) * (X.magnitude());
+//    float H = radius;
+// 	return (1.0/(H*H*H*M_PI)*(1.0 - 1.5*q*q + 0.75*q*q*q));
+// }
+// // Gradient for cubic spline kernel function
+// const Vector SPHStateData::grad_weight(size_t p, const Vector& P) const
+// {
+//    Vector X = (P - pos(p));
+//    float q = (1.0f/radius) * (X.magnitude());
+//    float H = radius;
+//    if (X == Vector(0.0, 0.0, 0.0))
+// 		return Vector(1.0, 1.0, 1.0);
+// 	else 
+// 		return (X)*(1.0/(H*H*H*H*M_PI*X.magnitude()))*(- 3.0*q + 2.25*q*q);
+// }
+// //current
+//cubic spline kernel
 const float SPHStateData::weight(size_t p, const Vector& P) const
 {
 			float res = 0.0;
@@ -295,8 +318,8 @@ void SPHStateData::compute_density()
 {
 
 
-   file.open("./densf/dens"+std::to_string(densiter)+".txt");
-   file << densiter << '\n';
+  // file.open("./densf/dens"+std::to_string(densiter)+".txt");
+  // file << densiter << '\n';
 #pragma omp parallel for
    for( size_t p=0;p<nb();p++)
    {
@@ -326,9 +349,11 @@ void SPHStateData::compute_density()
          //density += mass(pid) * weight(pid,P);
       }
       density *= density0;
-      #pragma omp critical
-      file << density << "\n";
+      //#pragma omp critical
+     // file << density << "\n";
       set_attr("density", p, density);
+      if(std::isnan(density) || std::isinf(density) || density == 0) std::cout << "density bad\n";
+
 //#pragma omp critical
 //      {
 //	 std::cout << "Particle " << p << std::endl;
@@ -341,12 +366,14 @@ void SPHStateData::compute_density()
 //         std::cout << "\tDensity " << density << std::endl;
 //      }
    } 
-   densiter++;
-   file.close();
+   //densiter++;
+  // file.close();
 
 
 }
-
+//DFSPH 2015
+//Equation above (12)
+//ρ∗i = ρi + ∆t Dρi/Dt = ρi + ∆t ∑j mj (v∗i − v∗j )∇Wi
 void SPHStateData::compute_predicted_density(size_t p, const double dt)
 {
 
@@ -362,11 +389,11 @@ void SPHStateData::compute_predicted_density(size_t p, const double dt)
    for(size_t a=0;a<cells.size();a++)
    {
       size_t pid = cells[a]; 
-      if(pid != p)
-      {
+      //if(pid != p)
+      //{
          const Vector V_j = vel(pid);
          pdensity += ((V-V_j) * grad_weight(pid,P));
-      }
+      //}
    }
 
    std::vector<size_t> neighbors;
@@ -377,18 +404,35 @@ void SPHStateData::compute_predicted_density(size_t p, const double dt)
       const Vector V_j = vel(pid);
       pdensity += ((V-V_j) * grad_weight(pid,P));     
    }
+   //pdensity *= get_float_attr("volume", p);
+   pdensity *= get_float_attr("volume", p) * density0;
+   //pdensity *= mass(p);
+   // #pragma omp critical
 
-   pdensity *= get_float_attr("volume", p);
 
-   pdensity = (density / density0) + dt *pdensity;
+   //pdensity = (density / density0) + dt *pdensity;
+   pdensity = (density / 1) + dt *pdensity;
+
+   if(pdensity <= 0)
+   {
+      #pragma omp critical
+      std::cout << "pdens: " << pdensity << " pdens*dt: " << pdensity*dt << '\n';
+   }
+   //pdensity = (density) + dt *pdensity;
+   //if(pdensity < 0) pdensity = density;
+   //pdensity = std::max(pdensity, density0);
+
    // #pragma omp critical
    // std::cout << "pdens: " << pdensity << '\n';
+   //if(std::isnan(pdensity) || std::isinf(pdensity)) std::cout << "pdensity bad\n";
+
    set_attr("predicted_density", p, pdensity);
    
-
-
 }
 
+//DFSPH 2015
+//Equation (9)
+//Dρi/Dt = ∑j mj (vi − vj )∇Wi
 void SPHStateData::compute_density_derivative(size_t p)
 {
 
@@ -404,11 +448,11 @@ void SPHStateData::compute_density_derivative(size_t p)
       for(size_t a=0;a<cells.size();a++)
       {
          size_t pid = cells[a]; 
-         if(pid != p)
-         {
+         //if(pid != p)
+         //{
             const Vector V_j = vel(pid);
             density_change += ((V-V_j) * grad_weight(pid,P));
-         }
+         //}
       }
 
       std::vector<size_t> neighbors;
@@ -417,18 +461,25 @@ void SPHStateData::compute_density_derivative(size_t p)
       {
          size_t pid = neighbors[a];
          const Vector V_j = vel(pid);
-         density_change += ((V-V_j) * grad_weight(pid,P));     
+         density_change += ((V-V_j) * grad_weight(pid,P)) ;     
       }
-      density_change *= get_float_attr("volume",p); //all fluid have constant volume
+      density_change *= mass(p) ; //all fluid have constant volume
+      //density_change *= mass(p) ; //all fluid have constant volume
+
 
       // density_change = std::max(density_change, 0.0f);
-      // #pragma omp critical
-      // std::cout << "Dens deriv: " << density_change << '\n';
-      set_attr("density_derivative", p, density_change);
+      //#pragma omp critical
+      //std::cout << "Dens deriv: " << density_change << '\n';
+      if(std::isnan(density_change) || std::isinf(density_change)) std::cout << "densitychange bad\n";
+      float dens = get_float_attr("density",p);
+      set_attr("density_derivative", p,  density_change);
    
  
 }
-//equ. 7 and 8
+//DFSPH 2015
+//Equation (9)
+//αi = ρi / |∑j mj ∇Wi|^2 + ∑j |mj ∇Wi|^2
+//since alpha is used in ∇p, ρi is cancalled out, i.e. 1 / |∑j mj ∇Wi|^2 + ∑j |mj ∇Wi|^2
 void SPHStateData::compute_factor()
 {
 #pragma omp parallel for   
@@ -447,24 +498,22 @@ void SPHStateData::compute_factor()
       for(size_t a=0;a<cells.size();a++)
       {         
          size_t pid = cells[a]; 
-         if(pid != p)
-         {
-            //const Vector grad_p_j = mass(pid) * grad_weight(pid, P);
-            const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P);
-            //const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P) * density0;
+         //if(pid != p)
+         //{
+            const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P) * density0;
 
-            sum_grad_p += grad_p_j * grad_p_j; // this equals magnitude squared
+            //dot product of a vector by itself is its magnitude squared
+            sum_grad_p += grad_p_j * grad_p_j; 
             grad_p_i += grad_p_j;
-         }
+         //}
       }
       std::vector<size_t> neighbors;
       neighbor_cells(i,j,k,neighbors);
       for(size_t a=0;a<neighbors.size();a++)
       {
          size_t pid = neighbors[a];
-         //const Vector grad_p_j = mass(pid) * grad_weight(pid, P);
-         const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P) ;
-         //const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P) * density0;
+
+         const Vector grad_p_j = get_float_attr("volume",pid) * grad_weight(pid, P) * density0;
 
          sum_grad_p += grad_p_j * grad_p_j;
          grad_p_i += grad_p_j;
@@ -472,7 +521,6 @@ void SPHStateData::compute_factor()
 
       sum_grad_p += grad_p_i * grad_p_i;
 
-      sum_grad_p *= density0;
 
       if(sum_grad_p > m_eps)
       {
@@ -481,63 +529,10 @@ void SPHStateData::compute_factor()
       }
       else
          factor = 0.f;
+      if(std::isnan(factor) || std::isinf(factor)) std::cout << "factor bad\n";
       set_attr("factor", p, factor);
    }
 }
-// void SPHStateData::compute_factor()
-// {
-// #pragma omp parallel for   
-//    for( size_t p=0;p<nb();p++)
-//    {
-//       float factor = 0;
-//       Vector lsum{};
-//       const Vector P = pos(p);
-//       size_t pindex = index(P);
-//       size_t i,j,k;
-//       anti_index(pindex, i,j,k);
-
-//       const std::vector<size_t>& cells = cell_contents(i,j,k);
-//       for(size_t a=0;a<cells.size();a++)
-//       {         
-//          size_t pid = cells[a]; 
-
-//          lsum += (mass(pid) * grad_weight(pid,P));
-//       }
-//       std::vector<size_t> neighbors;
-//       neighbor_cells(i,j,k,neighbors);
-//       for(size_t a=0;a<neighbors.size();a++)
-//       {
-//          size_t pid = neighbors[a];
-//          lsum += (mass(pid) * grad_weight(pid,P));
-
-//       }
-
-//       float rsum = 0;
-//       const std::vector<size_t>& cells2 = cell_contents(i,j,k);
-//       for(size_t a=0;a<cells2.size();a++)
-//       {         
-//          size_t pid = cells2[a];  
-//          rsum += (mass(pid) * grad_weight(pid,P)).magnitude() * 
-//                  (mass(pid) * grad_weight(pid,P)).magnitude();
-      
-//       }
-//       std::vector<size_t> neighbors2;
-//       neighbor_cells(i,j,k,neighbors2);
-//       for(size_t a=0;a<neighbors2.size();a++)
-//       {
-//          size_t pid = neighbors2[a];
-//          rsum += (mass(pid) * grad_weight(pid,P)).magnitude() * 
-//                  (mass(pid) * grad_weight(pid,P)).magnitude();
-//       }
-//       float density = get_float_attr("density", p);
-//       float denom = ( (lsum.magnitude() * lsum.magnitude()) + rsum );
-//       if(denom > m_eps)
-//          factor  =  1.0 / denom;
-//       else
-//          factor = 0;
-//       set_attr("factor", p, factor);
-//    }
-// }
 
 void SPHStateData::compute_divergence()
 {
@@ -627,7 +622,7 @@ void SPHStateData::set_radius( const float& v )
    particle_radius = radius/4.0f;
    float particle_diamter = particle_radius * 2;
    float mV = 0.8f * particle_diamter * particle_diamter * particle_diamter;
-   #pragma omp parall for
+   #pragma omp parallel for
    for(int p = 0; p < nb(); p++)
    {
       set_attr("volume", p, mV);
@@ -660,7 +655,7 @@ void SPHStateData::set_density0(float d0)
    density0 = d0;
 }
 
-
+//TODO: add pragmas
 float SPHStateData::average_density() //const
 {
    //file.open("./densavgf/densavg"+std::to_string(densavgiter)+".txt");  
@@ -682,9 +677,12 @@ float SPHStateData::average_predicted_density() //const
    //file.open("./pdensavgf/pdensavg"+std::to_string(pdensavgiter)+".txt");  
    //file << pdensavgiter << '\n';
    float density = 0.0;
+   int count = 0;
    for( size_t p=0;p<nb();p++)
    {
-      density += get_float_attr("predicted_density",p);
+      float d = get_float_attr("predicted_density",p) * density0;
+
+      density += d;
    }
    density /= nb();
   // file << density << '\n';

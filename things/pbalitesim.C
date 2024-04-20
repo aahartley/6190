@@ -4,6 +4,7 @@
 #include "ScreenCapturePPM.h"
 #include "MyThing.h"
 #include "MyThing1.h"
+#include "DFSPHThing.h"
 #include "CollisionSurface.h"
 #include "CollisionGeometryLibrary.h"
 
@@ -23,7 +24,8 @@ int main(int argc, char** argv)
 
   
    // Set up a simulation thing
-   pba::PbaThing mything = pba::CreateMyThing1();
+   pba::PbaThing mything = pba::CreateDFSPHThing();
+   //pba::PbaThing mything = pba::CreateMyThing1();
 
    pba::CollisionSurface cube = pba::GenerateCollisionCube();
 

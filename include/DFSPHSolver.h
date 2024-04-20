@@ -1,10 +1,13 @@
 //-------------------------------------------------------
 //
-//  SPHSolver.h
+//  DFSPHSPHSolver.h
 //
 //  Solvers for DFSPH Dynamics
 //
-//  Copyright (c) 2017 Jerry Tessendorf
+//  DFSPH functions are based off the 2015 paper: https://animation.rwth-aachen.de/media/papers/2015-SCA-DFSPH.pdf
+//  2017 paper, where the equations are written differently (still equivalent): https://animation.rwth-aachen.de/media/papers/2017-TVCG-ViscousDFSPH.pdf
+//
+//  Copyright (c) 2024 Jerry Tessendorf
 //
 //
 //--------------------------------------------------------
@@ -17,6 +20,8 @@
 #include "DFSPHForce.h"
 #include "GISolver.h"
 #include "CollisionHandler.h"
+#include <chrono>
+
 
 namespace pba
 {
@@ -69,6 +74,7 @@ class DFSPHSolverWithCollisions : public GISolverBase
     void compute_pressure_acc(size_t p, std::string type);
     float compute_aij_pj(size_t p);
     void get_timestep();
+    void fakecs();
 
 
 

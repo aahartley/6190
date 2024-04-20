@@ -35,18 +35,18 @@ bool CollisionPlane::hit( const Vector& X0, const Vector& Xu, const Vector& V, c
     // }
     // else fx0 = (X0 - P0) * normal + rad;
 
-    if((fxu == 0 || fx0 * fxu < 0 || (fxu <=0 && fx0 <=0))) hit = true;
+    if((fxu == 0 || fx0 * fxu < 0 )|| (fxu <=0 && fx0 <=0)) hit = true;
     if(hit)
     {
         //std::cout << V.X() << ' ' << V.Y() << ' ' << V.Z() << '\n';
-        if(V.isZero() == true)
-        {
-            std::cout << "Zero? " << V.isZero() << '\n';
-            //float epsilon = 0.06041;
-            XH_cand = X0 + (normal * rad); //- (normal*epsilon);
-            dtH_cand = dt;
-            return hit;
-        }       
+        // if(V.isZero() == true)
+        // {
+        //     std::cout << "Zero? " << V.isZero() << '\n';
+        //     //float epsilon = 0.06041;
+        //     XH_cand = X0 + (normal * rad); //- (normal*epsilon);
+        //     dtH_cand = dt;
+        //     return hit;
+        // }       
         // if(V.isZero())
         // {
         //    std::cout << V.X() << ' ' << V.Y() << ' ' << V.Z() << '\n';

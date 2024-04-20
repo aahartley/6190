@@ -19,6 +19,11 @@
         "OccupancyGrid.C": "cpp",
         "OccupancyVolume.C": "cpp",
         "DFSPHSolver.C": "cpp",
-        "SPHState.C": "cpp"
+        "SPHState.C": "cpp",
+        "ParticleEmitter.C": "cpp",
+        "DFSPHThing.C": "cpp",
+        "DFSPHForce.C": "cpp",
+        "ostream": "cpp",
+        "iostream": "cpp"
     }
 }

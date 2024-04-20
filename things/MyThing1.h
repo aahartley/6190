@@ -10,7 +10,7 @@
 #include "Force.h"
 #include "ForceLibrary.h"
 #include "CollisionHandler.h"
-
+#include "ParticleEmitter.h"
 
 
 using namespace std;

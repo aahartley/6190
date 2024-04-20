@@ -52,19 +52,19 @@ void AccumulatingForce::compute( DynamicalState& s, const double dt )
 // }
 
 
-// void AccumulatingForce::compute( SPHState& s, const double dt )
-// {
-// #pragma omp parallel for
-//    for( size_t i=0;i<s->nb();i++ )
-//    {
-//       s->set_accel(i,Vector(0,0,0));
-//    }
+void AccumulatingForce::compute( SPHState& s, const double dt )
+{
+#pragma omp parallel for
+   for( size_t i=0;i<s->nb();i++ )
+   {
+      s->set_accel(i,Vector(0,0,0));
+   }
 
-//    for( size_t i=0;i<forces.size();i++ )
-//    {
-//       forces[i]->compute(s,dt);
-//    }
-// }
+   for( size_t i=0;i<forces.size();i++ )
+   {
+      forces[i]->compute(s,dt);
+   }
+}
 
 
 

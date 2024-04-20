@@ -3,7 +3,10 @@
 //  SPHState.h
 //
 //  Container for data associated with the dynamics
-//  degrees of freedom of sph system.
+//  degrees of freedom of sph system (weakly incompressible & DFSPH).
+//
+//  DFSPH functions are based off the 2015 paper: https://animation.rwth-aachen.de/media/papers/2015-SCA-DFSPH.pdf
+//  2017 paper, where the equations are written differently (still equivalent): https://animation.rwth-aachen.de/media/papers/2017-TVCG-ViscousDFSPH.pdf
 //
 //  Copyright (c) 2019 Jerry Tessendorf
 //

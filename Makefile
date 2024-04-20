@@ -15,11 +15,14 @@ OFILES = base/PbaViewer.o \
 	 base/CollisionTriangle.o\
 	 base/CollisionGeometryLibrary.o\
 	 base/DFSPHForce.o\
-	 base/SPHState.C\
+	 base/SPHState.o\
 	 base/DFSPHSolver.o\
+	 base/ParticleEmitter.o\
 	 base/OccupancyVolume.o\
+	 base/AABB.o\
 	 things/MyThing.o \
-	 things/MyThing1.o
+	 things/MyThing1.o\
+	 things/DFSPHThing.o
 
 
 
@@ -28,7 +31,7 @@ OFILES = base/PbaViewer.o \
 ROOTDIR = .
 LIB = $(ROOTDIR)/lib/libpba.a 
 GLLDFLAGS     = -lglut -lGL -lm -lGLU
-CXX = g++ -Wall -g  -fPIC $(DEFINES) -fopenmp -std=c++11
+CXX = g++ -Wall -g -O2 -fPIC $(DEFINES) -fopenmp -std=c++11
 INCLUDES =  -I ./include/ -I /usr/local/include/ -I/usr/include/ -I ./things
 
 

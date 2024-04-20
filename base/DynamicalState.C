@@ -28,6 +28,7 @@ DynamicalStateData::DynamicalStateData(const std::string& nam) :
    vector_attributes["vel"] = DSAttribute<Vector>( "vel", Vector(0,0,0) );
    vector_attributes["accel"] = DSAttribute<Vector>( "accel", Vector(0,0,0) );
    float_attributes["mass"] = DSAttribute<float>( "mass", 1.0 );
+   float_attributes["rad"] = DSAttribute<float>( "rad", 0.0 );
    int_attributes["id"] = DSAttribute<int>( "id", -1 );
    color_attributes["ci"] = DSAttribute<Color>( "ci", Color(1,1,1,0) );
    re_find_main_attrs();
@@ -183,6 +184,11 @@ const float& DynamicalStateData::mass( const size_t p ) const
    return masses->second.get(p);
 }
 
+const float& DynamicalStateData::rad( const size_t p ) const
+{
+   return radiuses->second.get(p);
+}
+
 const Vector& DynamicalStateData::pos( const size_t p ) const
 {
    return positions->second.get(p);
@@ -255,6 +261,10 @@ void DynamicalStateData::set_mass( const size_t p, const float& value )
    masses->second.set(p, value);
 }
 
+void DynamicalStateData::set_particle_radius( const size_t p, const float& value )
+{
+   radiuses->second.set(p, value);
+}
 std::vector<std::string> DynamicalStateData::show_int_attrs() const
 {
    std::vector<std::string> keys;
@@ -427,6 +437,11 @@ void DynamicalStateData::re_find_main_attrs()
    {
       std::cout << "ERROR could not find masses\n";
    }
+   radiuses = float_attributes.find( "rad" );
+   if( radiuses == float_attributes.end() )
+   {
+      std::cout << "ERROR could not find rads\n";
+   }
    ids = int_attributes.find( "id" );
    if( ids == int_attributes.end() )
    {
@@ -439,7 +454,44 @@ void DynamicalStateData::re_find_main_attrs()
    }
 }
 
-
+int DynamicalStateData::erase_outside_bounds( const Vector& llc, const Vector& urc )
+{
+   AABB bounds(llc, urc);
+   size_t p = 0;
+   int count = 0;
+   while( p < nb_items )
+   {
+      const Vector& P = pos(p);
+      if(bounds.isInside(P))
+      {
+         p++;
+      }
+      else
+      {
+         for( std::map< std::string, DSAttribute<int> >::iterator a = int_attributes.begin(); a != int_attributes.end(); a++ )
+         {
+            a->second.erase(p);
+         }
+         for( std::map< std::string, DSAttribute<float> >::iterator a = float_attributes.begin(); a != float_attributes.end(); a++ )
+         {
+            a->second.erase(p);
+         }
+         for( std::map< std::string, DSAttribute<Vector> >::iterator a = vector_attributes.begin(); a != vector_attributes.end(); a++ )
+         {
+            a->second.erase(p);
+         }
+         for( std::map< std::string, DSAttribute<Color> >::iterator a = color_attributes.begin(); a != color_attributes.end(); a++ )
+         {
+            a->second.erase(p);
+         }
+         nb_items--;
+	 count++; 
+      }
+   }
+   std::cout << "Number removed: " << count << std::endl;
+   re_find_main_attrs();
+   return count;
+}
 
 
 pba::DynamicalState pba::CreateDynamicalState( const std::string& nam )
@@ -455,7 +507,50 @@ pba::DynamicalState pba::copy( const DynamicalState d )
 }
 
 
+pba::Vector pba::geometric_center( const DynamicalState& d )
+{
+   Vector center;
+   for( size_t i=0;i<d->nb();i++){ center += d->pos(i); }
+   center /= d->nb();
+   return center;
+}
 
+
+
+pba::AABB pba::BoundingBox( const DynamicalState& d )
+{
+   Vector llc = d->pos(0);
+   Vector urc = d->pos(0);
+   for(size_t i=1;i<d->nb();i++)
+   {
+      Vector P = d->pos(i);
+      if( P[0] < llc[0] ){ llc[0] = P[0]; }
+      if( P[1] < llc[1] ){ llc[1] = P[1]; }
+      if( P[2] < llc[2] ){ llc[2] = P[2]; }
+      if( P[0] > urc[0] ){ urc[0] = P[0]; }
+      if( P[1] > urc[1] ){ urc[1] = P[1]; }
+      if( P[2] > urc[2] ){ urc[2] = P[2]; }
+   }
+   return pba::AABB(llc,urc);
+}
+
+
+pba::AABB pba::BoundingBox( const DynamicalStateData& d )
+{
+   Vector llc = d.pos(0);
+   Vector urc = d.pos(0);
+   for(size_t i=1;i<d.nb();i++)
+   {
+      Vector P = d.pos(i);
+      if( P[0] < llc[0] ){ llc[0] = P[0]; }
+      if( P[1] < llc[1] ){ llc[1] = P[1]; }
+      if( P[2] < llc[2] ){ llc[2] = P[2]; }
+      if( P[0] > urc[0] ){ urc[0] = P[0]; }
+      if( P[1] > urc[1] ){ urc[1] = P[1]; }
+      if( P[2] > urc[2] ){ urc[2] = P[2]; }
+   }
+   return pba::AABB(llc,urc);
+}
 
 
 

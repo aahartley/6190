@@ -25,7 +25,7 @@ using namespace pba;
 PbaThingyDingy::PbaThingyDingy( const std::string& nam ) : 
    viewer (0),
    visible (true), 
-   dt      (1.0/24.0), 
+   dt      (1.0/48.0), 
    name    (nam), 
    animate (true)
    {}

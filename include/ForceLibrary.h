@@ -29,7 +29,7 @@
      void compute( DynamicalState& s, const double dt );
     //  void compute( RigidBodyState& s, const double dt );
     //  void compute( SoftBodyState& s, const double dt );
-    //  void compute( SPHState& s, const double dt );
+     void compute( SPHState& s, const double dt );
   
      void add( Force& f );
   
@@ -66,11 +66,11 @@
     //    DynamicalState ss = std::dynamic_pointer_cast<DynamicalStateData, SoftBodyStateData>(s);
     //    compute(ss,dt);
     // }
-    // void compute( SPHState& s, const double dt )
-    // {
-    //    DynamicalState ss = std::dynamic_pointer_cast<DynamicalStateData, SPHStateData>(s);
-    //    compute(ss,dt);
-    // }
+    void compute( SPHState& s, const double dt )
+    {
+       DynamicalState ss = std::dynamic_pointer_cast<DynamicalStateData, SPHStateData>(s);
+       compute(ss,dt);
+    }
 
 
 
