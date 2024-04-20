@@ -7,9 +7,7 @@ Includes forces, collisions, neighborhood search, DFSPH, Geometric Integration S
 ## WIP
 Add soft/rigid bodies
 Create a BVH for triangle collisions
-## Sample image of DFSPH
-![image](https://github.com/aahartley/6190/assets/50050814/bd250a7d-3669-42ea-8b20-684938380baa)
-## Prototype of DFSPH particles GIF
-https://github.com/aahartley/6190/assets/50050814/b09b546b-eb1a-48db-a63b-35e776b2ba90
+## DFSPH particles GIF
+https://github.com/aahartley/6190/assets/50050814/f6a037c1-ac06-4d49-a27a-fdf7735b4b0b
 
 
